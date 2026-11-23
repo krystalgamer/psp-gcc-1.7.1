@@ -1932,6 +1932,12 @@ default_assemble_integer (x, size, aligned_p)
   return op && (assemble_integer_with_op (op, x), true);
 }
 
+
+/* REAL_VALUE_TO_TARGET_* store 32-bit target words in longs.  Sign
+   extend them so the output does not depend on the width of the
+   host's long.  */
+#define GEN_INT_WORD32(X) GEN_INT (trunc_int_for_mode ((X), SImode))
+
 /* Assemble the integer constant X into an object of SIZE bytes.  ALIGN is
    the alignment of the integer in bits.  Return 1 if we were able to output
    the constant, otherwise 0.  If FORCE is nonzero, abort if we can't output
@@ -2003,25 +2009,25 @@ assemble_real (d, mode, align)
 	{
 	case SFmode:
 	  REAL_VALUE_TO_TARGET_SINGLE (d, l);
-	  assemble_integer (GEN_INT (l), 4, align, 1);
+	  assemble_integer (GEN_INT_WORD32 (l), 4, align, 1);
 	  break;
 	case DFmode:
 	  REAL_VALUE_TO_TARGET_DOUBLE (d, data);
-	  assemble_integer (GEN_INT (data[0]), 4, align, 1);
-	  assemble_integer (GEN_INT (data[1]), 4, nalign, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[0]), 4, align, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[1]), 4, nalign, 1);
 	  break;
 	case XFmode:
 	  REAL_VALUE_TO_TARGET_LONG_DOUBLE (d, data);
-	  assemble_integer (GEN_INT (data[0]), 4, align, 1);
-	  assemble_integer (GEN_INT (data[1]), 4, nalign, 1);
-	  assemble_integer (GEN_INT (data[2]), 4, nalign, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[0]), 4, align, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[1]), 4, nalign, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[2]), 4, nalign, 1);
 	  break;
 	case TFmode:
 	  REAL_VALUE_TO_TARGET_LONG_DOUBLE (d, data);
-	  assemble_integer (GEN_INT (data[0]), 4, align, 1);
-	  assemble_integer (GEN_INT (data[1]), 4, nalign, 1);
-	  assemble_integer (GEN_INT (data[2]), 4, nalign, 1);
-	  assemble_integer (GEN_INT (data[3]), 4, nalign, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[0]), 4, align, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[1]), 4, nalign, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[2]), 4, nalign, 1);
+	  assemble_integer (GEN_INT_WORD32 (data[3]), 4, nalign, 1);
 	  break;
 	default:
 	  abort ();
