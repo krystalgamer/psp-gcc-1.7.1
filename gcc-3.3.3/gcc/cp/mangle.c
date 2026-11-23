@@ -1245,10 +1245,34 @@ write_real_cst (value)
 	 because the old floating-point emulator used a different
 	 format for REAL_VALUE_TYPE.  */
       size_t i;
+#if HOST_BITS_PER_LONG == 64
+      /* Mangle the bytes the ILP32 (i386) layout would contain, so that
+	 symbol names do not depend on the host: a 32-bit header followed
+	 by five 32-bit significand words.  */
+      const REAL_VALUE_TYPE *r = &TREE_REAL_CST (value);
+      unsigned char bytes[24];
+      unsigned long w;
+      int k, b;
+
+      w = (unsigned long) r->class
+	  | ((unsigned long) r->sign << 2)
+	  | (((unsigned long) r->exp & ((1UL << EXP_BITS) - 1)) << 3);
+      for (b = 0; b < 4; b++)
+	bytes[b] = (w >> (8 * b)) & 0xff;
+      for (k = 0; k < 5; k++)
+	{
+	  w = (r->sig[(k + 1) / 2] >> (32 * ((k + 1) % 2))) & 0xffffffffUL;
+	  for (b = 0; b < 4; b++)
+	    bytes[4 + 4 * k + b] = (w >> (8 * b)) & 0xff;
+	}
+      for (i = 0; i < sizeof (bytes); ++i)
+	write_number (bytes[i], /*unsigned_p*/ 1, /*base*/ 16);
+#else
       for (i = 0; i < sizeof (TREE_REAL_CST (value)); ++i)
 	write_number (((unsigned char *) &TREE_REAL_CST (value))[i], 
 		      /*unsigned_p*/ 1,
 		      /*base*/ 16);
+#endif
       G.need_abi_warning = 1;
     }
 }
