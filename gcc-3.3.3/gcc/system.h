@@ -491,6 +491,14 @@ extern void abort PARAMS ((void));
 #include "libiberty.h"
 #include "symcat.h"
 
+/* Sort with libiberty's merge sort, which behaves like the glibc qsort
+   the original compiler used, so that the output does not depend on the
+   host's qsort when a comparison function returns 0 for different
+   elements.  */
+#undef qsort
+#define qsort(BASE, NMEMB, SIZE, COMPAR) \
+  stable_qsort (BASE, NMEMB, SIZE, COMPAR)
+
 /* Provide a default for the HOST_BIT_BUCKET.
    This suffices for POSIX-like hosts.  */
 

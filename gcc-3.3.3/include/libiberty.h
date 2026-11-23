@@ -246,6 +246,10 @@ extern char *xstrdup PARAMS ((const char *)) ATTRIBUTE_MALLOC;
 
 extern PTR xmemdup PARAMS ((const PTR, size_t, size_t)) ATTRIBUTE_MALLOC;
 
+/* Sort like qsort, with the same results on every host.  */
+extern void stable_qsort PARAMS ((void *, size_t, size_t,
+				  int (*) (const void *, const void *)));
+
 /* Physical memory routines.  Return values are in BYTES.  */
 extern double physmem_total PARAMS ((void));
 extern double physmem_available PARAMS ((void));
