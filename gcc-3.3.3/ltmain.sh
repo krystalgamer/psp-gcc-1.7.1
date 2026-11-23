@@ -4208,7 +4208,8 @@ fi\
 	  $show "(cd $xdir && $AR x $xabs)"
 	  $run eval "(cd \$xdir && $AR x \$xabs)" || exit $?
 
-	  oldobjs="$oldobjs "`find $xdir -name \*.${objext} -print | $NL2SP`
+	  # Keep the members in archive order so the result is deterministic.
+	  oldobjs="$oldobjs "`$AR t $xabs | grep "\.${objext}\$" | sed "s%^%$xdir/%" | $NL2SP`
 	done
       fi
 
