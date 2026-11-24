@@ -21,6 +21,11 @@
 #                        1.7.1, whose build host had the SDK installed: with
 #                        a working "psp-ld -shared", configure defines
 #                        HAVE_LD_RO_RW_SECTION_MIXING.
+#   PSP_BUILDDIR         if set, the build directory is mounted at this path
+#                        (with gcc-3.3.3 next to it), so that the paths in
+#                        the libgcc debugging information match.  1.7.1 was
+#                        built in /home/tei/psp/gcc/pspgcc-1.7.1.release/
+#                        rpmwork/BUILD/psp-gcc_1_7_1-1/workforbuild/gcc-bin.
 #
 # The binaries end up in WORKDIR/stripped.
 
@@ -67,8 +72,15 @@ G=$W/lib/gcc-lib/i386-redhat-linux/3.2.2
 ln -sfn "$W/root/usr/bin/as" "$G/as"
 ln -sfn "$W/root/usr/bin/ld" "$G/ld"
 
+BD=$W/src/gcc-bin
+EXTRA=
+if [ -n "$PSP_BUILDDIR" ]; then
+  BD=$PSP_BUILDDIR
+  EXTRA="--tmpfs /home --bind $HOME $HOME --bind $W/src $(dirname "$PSP_BUILDDIR")"
+fi
+
 run () {
-  bwrap --dev-bind / / \
+  bwrap --dev-bind / / $EXTRA \
     --ro-bind /usr/lib /tmp/.rh9hostlib \
     --ro-bind "$W/lib" /usr/lib \
     --ro-bind "$W/root/usr/include" /usr/include \
@@ -83,8 +95,7 @@ run () {
 # The original was configured from a sibling directory of gcc-3.3.3.
 rm -rf "$W/src" && mkdir -p "$W/src/gcc-bin"
 ln -s "$TOP/gcc-3.3.3" "$W/src/gcc-3.3.3"
-cd "$W/src/gcc-bin"
-run sh -c "PATH=$B/bin:\$PATH; export PATH;
+run sh -c "cd $BD && PATH=$B/bin:\$PATH; export PATH;
   ../gcc-3.3.3/configure --target=psp \
   --prefix=/usr/local/psp/gcc-$V --with-gnu-ld --with-gnu-as \
   --enable-languages=c,c++ --enable-c-mbchar --enable-threads=psp \
