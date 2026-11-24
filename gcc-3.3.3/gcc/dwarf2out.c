@@ -2243,13 +2243,20 @@ typedef enum
 }
 dw_val_class;
 
+/* Attribute and location operand values are kept in 32 bits, as with the
+   ILP32 hosts this code was written for, so that the debug information
+   does not depend on the size of the host's long.  */
+#define DW_BITS_PER_LONG 32
+typedef int dw_long;
+typedef unsigned int dw_ulong;
+
 /* Describe a double word constant value.  */
 /* ??? Every instance of long_long in the code really means CONST_DOUBLE.  */
 
 typedef struct dw_long_long_struct
 {
-  unsigned long hi;
-  unsigned long low;
+  dw_ulong hi;
+  dw_ulong low;
 }
 dw_long_long_const;
 
@@ -2274,8 +2281,8 @@ typedef struct dw_val_struct
       long unsigned val_offset;
       dw_loc_list_ref  val_loc_list;
       dw_loc_descr_ref val_loc;
-      long int val_int;
-      long unsigned val_unsigned;
+      dw_long val_int;
+      dw_ulong val_unsigned;
       dw_long_long_const val_long_long;
       dw_float_const val_float;
       struct
@@ -2840,7 +2847,7 @@ output_loc_operands (loc)
       break;
     case DW_OP_const8u:
     case DW_OP_const8s:
-      if (HOST_BITS_PER_LONG < 64)
+      if (DW_BITS_PER_LONG < 64)
 	abort ();
       dw2_asm_output_data (8, val1->v.val_int, NULL);
       break;
@@ -6238,7 +6245,7 @@ size_of_die (die)
 	  size += constant_size (AT_unsigned (a));
 	  break;
 	case dw_val_class_long_long:
-	  size += 1 + 2*HOST_BITS_PER_LONG/HOST_BITS_PER_CHAR; /* block */
+	  size += 1 + 2*DW_BITS_PER_LONG/HOST_BITS_PER_CHAR; /* block */
 	  break;
 	case dw_val_class_float:
 	  size += 1 + a->dw_attr_val.v.val_float.length * 4; /* block */
@@ -6696,7 +6703,7 @@ output_die (die)
 	    unsigned HOST_WIDE_INT first, second;
 
 	    dw2_asm_output_data (1,
-				 2 * HOST_BITS_PER_LONG / HOST_BITS_PER_CHAR,
+				 2 * DW_BITS_PER_LONG / HOST_BITS_PER_CHAR,
 				 "%s", name);
 
 	    if (WORDS_BIG_ENDIAN)
@@ -6710,9 +6717,9 @@ output_die (die)
 		second = a->dw_attr_val.v.val_long_long.hi;
 	      }
 
-	    dw2_asm_output_data (HOST_BITS_PER_LONG / HOST_BITS_PER_CHAR,
+	    dw2_asm_output_data (DW_BITS_PER_LONG / HOST_BITS_PER_CHAR,
 				 first, "long long constant");
-	    dw2_asm_output_data (HOST_BITS_PER_LONG / HOST_BITS_PER_CHAR,
+	    dw2_asm_output_data (DW_BITS_PER_LONG / HOST_BITS_PER_CHAR,
 				 second, NULL);
 	  }
 	  break;
@@ -9079,15 +9086,15 @@ add_const_value_attribute (die, rtl)
 	HOST_WIDE_INT val = INTVAL (rtl);
 
 	/* ??? We really should be using HOST_WIDE_INT throughout.  */
-	if (val < 0 && (long) val == val)
-	  add_AT_int (die, DW_AT_const_value, (long) val);
-	else if ((unsigned long) val == (unsigned HOST_WIDE_INT) val)
-	  add_AT_unsigned (die, DW_AT_const_value, (unsigned long) val);
+	if (val < 0 && (dw_long) val == val)
+	  add_AT_int (die, DW_AT_const_value, (dw_long) val);
+	else if ((dw_ulong) val == (unsigned HOST_WIDE_INT) val)
+	  add_AT_unsigned (die, DW_AT_const_value, (dw_ulong) val);
 	else
 	  {
-#if HOST_BITS_PER_LONG * 2 == HOST_BITS_PER_WIDE_INT
+#if DW_BITS_PER_LONG * 2 == HOST_BITS_PER_WIDE_INT
 	    add_AT_long_long (die, DW_AT_const_value,
-			      val >> HOST_BITS_PER_LONG, val);
+			      val >> DW_BITS_PER_LONG, val);
 #else
 	    abort ();
 #endif
@@ -9134,7 +9141,7 @@ add_const_value_attribute (die, rtl)
 	else
 	  {
 	    /* ??? We really should be using HOST_WIDE_INT throughout.  */
-	    if (HOST_BITS_PER_LONG != HOST_BITS_PER_WIDE_INT)
+	    if (DW_BITS_PER_LONG != HOST_BITS_PER_WIDE_INT)
 	      abort ();
 
 	    add_AT_long_long (die, DW_AT_const_value,
