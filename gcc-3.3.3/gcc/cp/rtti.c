@@ -1379,6 +1379,7 @@ emit_support_tinfos ()
     &long_integer_type_node, &long_unsigned_type_node,
     &long_long_integer_type_node, &long_long_unsigned_type_node,
     &float_type_node, &double_type_node, &long_double_type_node,
+    &intTI_type_node, &unsigned_intTI_type_node,
     0
   };
   int ix;
