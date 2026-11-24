@@ -635,9 +635,10 @@ parse_string (pfile, token, terminator)
      cppchar_t terminator;
 {
   cpp_buffer *buffer = pfile->buffer;
-  unsigned char *dest, *limit, *start;
+  unsigned char *dest, *limit;
   cppchar_t c;
   bool warned_nulls = false;
+  unsigned char *start;
   int char_len;
 #ifdef MULTIBYTE_CHARS
   wchar_t wc;
