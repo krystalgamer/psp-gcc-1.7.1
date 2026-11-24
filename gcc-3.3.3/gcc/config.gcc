@@ -1933,7 +1933,7 @@ mipspspel-*-elf*)
 	tm_file="${tm_file} mips/elf.h mips/psp.h"
 	tmake_file=mips/t-psp
 	target_cpu_default="MASK_SINGLE_FLOAT"
-	tm_defines="MIPS_ABI_DEFAULT=ABI_EABI MIPS_CPU_STRING_DEFAULT=\\\"allegrex\\\" MAX_LONG_TYPE_SIZE=32"
+	tm_defines="MIPS_ABI_DEFAULT=ABI_EABI MIPS_CPU_STRING_DEFAULT=\\\"allegrex\\\" MAX_LONG_TYPE_SIZE=32 MAX_WCHAR_TYPE_SIZE=32"
 	;;
 mips-*-elf* | mipsel-*-elf*)
 	tm_file="${tm_file} mips/elf.h"
