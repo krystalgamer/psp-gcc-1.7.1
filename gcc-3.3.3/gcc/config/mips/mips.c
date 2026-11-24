@@ -3784,7 +3784,7 @@ block_move_loop_allegrex (dest_reg, src_reg, bytes, align, orig_dest,
   rtx bytes_rtx;
   rtx regs[MAX_MOVE_REGS];
   enum machine_mode mode;
-  int leftover, ofs2, ofs3;
+  int leftover;
 
   leftover = bytes % MAX_MOVE_BYTES;
   bytes -= leftover;
@@ -3827,13 +3827,10 @@ block_move_loop_allegrex (dest_reg, src_reg, bytes, align, orig_dest,
 		      gen_rtx_MEM (mode, plus_constant (src_reg, 0)));
       emit_move_insn (regs[1],
 		      gen_rtx_MEM (mode, plus_constant (src_reg, align)));
-      ofs2 = 2 * align;
       emit_move_insn (regs[2],
-		      gen_rtx_MEM (mode, plus_constant (src_reg, ofs2)));
-      ofs3 = 3 * align;
+		      gen_rtx_MEM (mode, plus_constant (src_reg, 2 * align)));
       emit_move_insn (regs[3],
-		      gen_rtx_MEM (mode, plus_constant (src_reg, ofs3)));
-
+		      gen_rtx_MEM (mode, plus_constant (src_reg, 3 * align)));
       if (TUNE_ALLEGREX2)
 	{
 	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, 0)),
@@ -3842,7 +3839,8 @@ block_move_loop_allegrex (dest_reg, src_reg, bytes, align, orig_dest,
 	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, align)),
 			  regs[1]);
 	  emit_insn (gen_addsi3 (dest_reg, dest_reg, bytes_rtx));
-	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, -ofs2)),
+	  emit_move_insn (gen_rtx_MEM (mode,
+				       plus_constant (dest_reg, -2 * align)),
 			  regs[2]);
 	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, -align)),
 			  regs[3]);
@@ -3853,9 +3851,11 @@ block_move_loop_allegrex (dest_reg, src_reg, bytes, align, orig_dest,
 			  regs[0]);
 	  emit_insn (gen_addsi3 (src_reg, src_reg, bytes_rtx));
 	  emit_insn (gen_addsi3 (dest_reg, dest_reg, bytes_rtx));
-	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, -ofs3)),
+	  emit_move_insn (gen_rtx_MEM (mode,
+				       plus_constant (dest_reg, -3 * align)),
 			  regs[1]);
-	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, -ofs2)),
+	  emit_move_insn (gen_rtx_MEM (mode,
+				       plus_constant (dest_reg, -2 * align)),
 			  regs[2]);
 	  emit_move_insn (gen_rtx_MEM (mode, plus_constant (dest_reg, -align)),
 			  regs[3]);
