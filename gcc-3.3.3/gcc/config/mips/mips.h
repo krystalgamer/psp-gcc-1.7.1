@@ -2054,6 +2054,17 @@ extern char mips_hard_regno_mode_ok[][FIRST_PSEUDO_REGISTER];
 
 #define PIC_FUNCTION_ADDR_REGNUM (GP_REG_FIRST + 25)
 
+/* psp-gcc 1.7.1's mips.h has eleven more lines than this file has
+   without this comment, somewhere between struct mips_cpu_info and
+   enum reg_class.  What they contain is unknown: the only evidence is
+   the DW_AT_decl_line values of the mips.h types (reg_class, mips_args,
+   mips_builtins) in the debug information of the released libgcc.a.
+   This comment and the blank line after it stand in for those lines so
+   that the line numbers, and so libgcc.a, stay identical.  Nothing in
+   the released compilers depends on them; the line numbers of the
+   types above this point already match.  Keep this comment exactly ten
+   lines long.  */
+
 /* Define the classes of registers for register constraints in the
    machine description.  Also define ranges of constants.
 
