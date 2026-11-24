@@ -15,9 +15,6 @@ $(T)crtn.o: $(srcdir)/config/mips/crtn.asm $(GCC_PASSES)
 # kernel declarations instead of requiring the SDK's <kernel.h>.
 TARGET_LIBGCC2_CFLAGS = -G 0 -D_IN_GCC_LIB
 
-# libgcc is built without debugging information.
-LIBGCC2_DEBUG_CFLAGS =
-
 # The PSP only has hard single precision floating point and is always
 # little endian, so there is only one multilib.
 MULTILIB_OPTIONS =
