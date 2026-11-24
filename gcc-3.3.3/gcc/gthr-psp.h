@@ -36,17 +36,8 @@ extern "C" {
 #if defined(_IN_GCC_LIB)
 /* Minimal kernel stuff to bootstrap compiler */
 
-#define SCE_KERNEL_SA_THPRI 0x0100U 
-
 extern int sceKernelCpuSuspendIntr (void);
 extern int sceKernelCpuResumeIntr (int oldstat);
-extern int sceKernelGetThreadId(void);
-extern int sceKernelCreateSema(const char *s, int flg, int val, int max,
-			       const void *p);
-extern int sceKernelDeleteSema(int id);
-extern int sceKernelWaitSema(int id, int count, void *p);
-extern int sceKernelPollSema (int id, int count);
-extern int sceKernelSignalSema (int id, int count);
 #else
 #include <kernel.h>
 #endif
@@ -230,14 +221,11 @@ typedef int __gthread_key_t;
 typedef char __gthread_once_t;
 typedef struct __gthread_mutex
 {
-  int semid;
-  int owner;
-  int count;
-  int res;
+  int status;
 } __gthread_mutex_t;
 
 #define __GTHREAD_ONCE_INIT 0
-#define __GTHREAD_MUTEX_INIT { -1, -1, 0, 0}
+#define __GTHREAD_MUTEX_INIT { 0 }
 
 static inline int
 __gthread_once (__gthread_once_t *once, void (*func) (void))
@@ -279,110 +267,22 @@ __gthread_setspecific (__gthread_key_t key, const void *ptr)
 static inline int
 __gthread_mutex_lock (__gthread_mutex_t *mutex)
 {
-  int stat;
-  int myid;
-  int own;
-  int rtn;
-
-  if (mutex->semid < 0)
-    {
-      mutex->semid = sceKernelCreateSema ("gccGthrMutex",
-					  SCE_KERNEL_SA_THPRI,
-					  1, 1, 0);
-    }
-
-  myid = sceKernelGetThreadId ();
-  stat = sceKernelCpuSuspendIntr ();
-  if (mutex->owner < 0)
-    {
-      mutex->owner = myid;
-      own = 1;
-    }
-  else
-    own = 0;
-  sceKernelCpuResumeIntr (stat);
-
-  if (own || mutex->owner != myid)
-    {
-      rtn = sceKernelWaitSema (mutex->semid, 1, 0);
-    }
-  else
-    {
-      mutex->count++;
-      rtn = 0;
-    }
-    
-  return rtn;
+  mutex->status = sceKernelCpuSuspendIntr ();
+  return 0;
 }
 
 static inline int
 __gthread_mutex_trylock (__gthread_mutex_t *mutex)
 {
-  int stat;
-  int myid;
-  int own;
-  int rtn;
-
-  if (mutex->semid < 0)
-    {
-      mutex->semid = sceKernelCreateSema ("gccGthrMutex",
-					  SCE_KERNEL_SA_THPRI,
-					  1, 1, 0);
-    }
-
-  myid = sceKernelGetThreadId ();
-  stat = sceKernelCpuSuspendIntr ();
-  if (mutex->owner < 0)
-    {
-      mutex->owner = myid;
-      own = 1;
-    }
-  else
-    own = 0;
-  sceKernelCpuResumeIntr (stat);
-
-  if (own || mutex->owner != myid)
-    {
-      rtn = sceKernelPollSema (mutex->semid, 1);
-    }
-  else
-    {
-      mutex->count++;
-      rtn = 0;
-    }
-    
-  return rtn;
+  mutex->status = sceKernelCpuSuspendIntr ();
+  return 0;
 }
 
 static inline int
 __gthread_mutex_unlock (__gthread_mutex_t *mutex)
 {
-  int myid;
-  int rtn;
-
-  myid = sceKernelGetThreadId ();
-  if (mutex->owner == myid)
-    {
-      if (mutex->count > 0 && --mutex->count == 0)
-	{
-	  rtn = sceKernelSignalSema (mutex->semid, 1);
-	  mutex->owner = -1;
-	  sceKernelDeleteSema (mutex->semid);
-	  mutex->semid = -1;
-	}
-    }
-  else if (mutex->owner >= 0)
-    {
-      rtn = sceKernelSignalSema (mutex->semid, 1);
-      mutex->owner = -1;
-      sceKernelDeleteSema (mutex->semid);
-      mutex->semid = -1;
-      mutex->count = 0;
-    }
-  else
-    rtn = -1;
-
-  return rtn;
+  sceKernelCpuResumeIntr (mutex->status);
+  return 0;
 }
 
 #endif /* _LIBOBJC */
