@@ -7997,7 +7997,7 @@ move\\t%0,%z4\\n\\
 
   /* There is no rotate left instruction; rotate right instead.  */
   if (GET_CODE (operands[2]) == CONST_INT)
-    amount = GEN_INT (32 - INTVAL (operands[2]));
+    amount = GEN_INT ((32 - INTVAL (operands[2])) & 31);
   else
     {
       /* Only the low five bits of the negated amount matter.  */
@@ -8021,7 +8021,7 @@ move\\t%0,%z4\\n\\
 
   if ((GET_CODE (operands[2]) == CONST_INT)
       && (INTVAL (operands[2]) < 0 || INTVAL (operands[2]) >= 32))
-    abort ();
+    operands[2] = GEN_INT (INTVAL (operands[2]) & 31);
 
   return \"ror\\t%0,%1,%2\";
 }"
