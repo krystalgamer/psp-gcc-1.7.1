@@ -10957,30 +10957,29 @@ ld\\t%2,%1-%S1(%2)\;daddu\\t%2,%2,$31\\n\\t%*j\\t%2"
 ;; the instructions above.
 ;;
 
-;; Multiply-accumulate into HI/LO.
+;; Multiply-accumulate into HI/LO.  The accumulator is an input operand
+;; tied to the output.
 
 (define_insn "maddsi_allegrex"
-  [(set (match_operand:SI 0 "register_operand" "+l")
+  [(set (match_operand:SI 0 "register_operand" "=l")
 	(plus:SI (mult:SI (match_operand:SI 1 "register_operand" "d")
 			  (match_operand:SI 2 "register_operand" "d"))
-		 (match_dup 0)))
-   (clobber (match_scratch:SI 3 "=h"))
-   (clobber (match_scratch:SI 4 "=a"))]
+		 (match_operand:SI 3 "register_operand" "0")))
+   (clobber (match_scratch:SI 4 "=h"))
+   (clobber (match_scratch:SI 5 "=a"))]
   "TARGET_ALLEGREX && TARGET_MADD"
   "madd\\t%1,%2"
   [(set_attr "type"	"imadd")
    (set_attr "mode"	"SI")])
 
 (define_insn "madddi_allegrex"
-  [(set (match_operand:DI 0 "register_operand" "+x")
+  [(set (match_operand:DI 0 "register_operand" "=x")
 	(plus:DI (mult:DI (match_operator:DI 3 "extend_operator"
 			   [(match_operand:SI 1 "register_operand" "d")])
 			  (match_operator:DI 4 "extend_operator"
 			   [(match_operand:SI 2 "register_operand" "d")]))
-		 (match_dup 0)))
-   (clobber (match_scratch:SI 5 "=a"))]
-  "TARGET_ALLEGREX && TARGET_MADD
-   && GET_CODE (operands[3]) == GET_CODE (operands[4])"
+		 (match_operand:DI 5 "register_operand" "0")))]
+  "TARGET_ALLEGREX && TARGET_MADD"
   "*
 {
   if (GET_CODE (operands[3]) == SIGN_EXTEND)
@@ -10989,30 +10988,28 @@ ld\\t%2,%1-%S1(%2)\;daddu\\t%2,%2,$31\\n\\t%*j\\t%2"
     return \"maddu\\t%1,%2\";
 }"
   [(set_attr "type"	"imadd")
-   (set_attr "mode"	"SI")])
+   (set_attr "mode"	"DI")])
 
 (define_insn "msubsi_allegrex"
-  [(set (match_operand:SI 0 "register_operand" "+l")
-	(minus:SI (match_dup 0)
-		  (mult:SI (match_operand:SI 1 "register_operand" "d")
-			   (match_operand:SI 2 "register_operand" "d"))))
-   (clobber (match_scratch:SI 3 "=h"))
-   (clobber (match_scratch:SI 4 "=a"))]
+  [(set (match_operand:SI 0 "register_operand" "=l")
+	(minus:SI (match_operand:SI 1 "register_operand" "0")
+		  (mult:SI (match_operand:SI 2 "register_operand" "d")
+			   (match_operand:SI 3 "register_operand" "d"))))
+   (clobber (match_scratch:SI 4 "=h"))
+   (clobber (match_scratch:SI 5 "=a"))]
   "TARGET_ALLEGREX && TARGET_MADD"
-  "msub\\t%1,%2"
+  "msub\\t%2,%3"
   [(set_attr "type"	"imadd")
    (set_attr "mode"	"SI")])
 
 (define_insn "msubdi_allegrex"
-  [(set (match_operand:DI 0 "register_operand" "+x")
-	(minus:DI (match_dup 0)
-		  (mult:DI (match_operator:DI 3 "extend_operator"
-			    [(match_operand:SI 1 "register_operand" "d")])
-			   (match_operator:DI 4 "extend_operator"
-			    [(match_operand:SI 2 "register_operand" "d")]))))
-   (clobber (match_scratch:SI 5 "=a"))]
-  "TARGET_ALLEGREX && TARGET_MADD
-   && GET_CODE (operands[3]) == GET_CODE (operands[4])"
+  [(set (match_operand:DI 0 "register_operand" "=x")
+	(minus:DI (match_operand:DI 1 "register_operand" "0")
+		  (mult:DI (match_operator:DI 4 "extend_operator"
+			    [(match_operand:SI 2 "register_operand" "d")])
+			   (match_operator:DI 5 "extend_operator"
+			    [(match_operand:SI 3 "register_operand" "d")]))))]
+  "TARGET_ALLEGREX && TARGET_MADD"
   "*
 {
   if (GET_CODE (operands[3]) == SIGN_EXTEND)
