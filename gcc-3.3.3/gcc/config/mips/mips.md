@@ -969,7 +969,7 @@
   [(set (match_operand:DI 0 "register_operand" "=d,&d")
 	(plus:DI (match_operand:DI 1 "register_operand" "0,d")
 		 (match_operand:DI 2 "register_operand" "d,d")))
-   (clobber (match_operand:SI 3 "register_operand" "=d,d"))]
+   (clobber (match_operand:SI 3 "register_operand" "=&d,&d"))]
   "!TARGET_64BIT && !TARGET_DEBUG_G_MODE && !TARGET_MIPS16"
   "*
 {
@@ -1494,7 +1494,7 @@
   [(set (match_operand:DI 0 "register_operand" "=d")
 	(minus:DI (match_operand:DI 1 "register_operand" "d")
 		  (match_operand:DI 2 "register_operand" "d")))
-   (clobber (match_operand:SI 3 "register_operand" "=d"))]
+   (clobber (match_operand:SI 3 "register_operand" "=&d"))]
   "!TARGET_64BIT && !TARGET_DEBUG_G_MODE && !TARGET_MIPS16"
   "sltu\\t%3,%L1,%L2\;subu\\t%L0,%L1,%L2\;subu\\t%M0,%M1,%M2\;subu\\t%M0,%M0,%3"
   [(set_attr "type"	"darith")
@@ -7015,7 +7015,7 @@ move\\t%0,%z4\\n\\
   [(set (match_operand:DI 0 "register_operand" "=&d")
 	(ashift:DI (match_operand:DI 1 "register_operand" "d")
 		   (match_operand:SI 2 "register_operand" "d")))
-   (clobber (match_operand:SI 3 "register_operand" "=d"))]
+   (clobber (match_operand:SI 3 "register_operand" "=&d"))]
   "!TARGET_64BIT && !TARGET_DEBUG_G_MODE && !TARGET_MIPS16"
   "*
 {
@@ -7372,7 +7372,7 @@ move\\t%0,%z4\\n\\
   [(set (match_operand:DI 0 "register_operand" "=&d")
 	(ashiftrt:DI (match_operand:DI 1 "register_operand" "d")
 		     (match_operand:SI 2 "register_operand" "d")))
-   (clobber (match_operand:SI 3 "register_operand" "=d"))]
+   (clobber (match_operand:SI 3 "register_operand" "=&d"))]
   "!TARGET_64BIT && !TARGET_DEBUG_G_MODE && !TARGET_MIPS16"
   "*
 {
@@ -7754,7 +7754,7 @@ move\\t%0,%z4\\n\\
   [(set (match_operand:DI 0 "register_operand" "=&d")
 	(lshiftrt:DI (match_operand:DI 1 "register_operand" "d")
 		     (match_operand:SI 2 "register_operand" "d")))
-   (clobber (match_operand:SI 3 "register_operand" "=d"))]
+   (clobber (match_operand:SI 3 "register_operand" "=&d"))]
   "!TARGET_64BIT && !TARGET_DEBUG_G_MODE && !TARGET_MIPS16"
   "*
 {
@@ -7840,7 +7840,7 @@ move\\t%0,%z4\\n\\
   [(set (match_operand:DI 0 "register_operand" "=d")
 	(lshiftrt:DI (match_operand:DI 1 "register_operand" "d")
 		   (match_operand:SI 2 "small_int" "IJK")))
-   (clobber (match_operand:SI 3 "register_operand" "=d"))]
+   (clobber (match_operand:SI 3 "register_operand" "=&d"))]
   "!TARGET_64BIT && !TARGET_DEBUG_G_MODE && !TARGET_MIPS16
    && (INTVAL (operands[2]) & 63) < 32
    && (INTVAL (operands[2]) & 63) != 0"
