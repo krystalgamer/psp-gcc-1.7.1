@@ -6,20 +6,25 @@ be rebuilt and kept running on modern 64-bit hosts. The original release
 binaries are 32-bit x86 Linux programs. Reference archive:
 <https://github.com/decompme/compilers/releases/download/compilers/psp-gcc-1.7.1.tar.gz>.
 
-Sony never published the patches. `gcc-3.3.3/` starts from pristine FSF
-GCC 3.3.3 (tag `fsf-gcc-3.3.3`). The 1.7.1 changes sit on top of the
-reconstructed psp-gcc 1.3.1 (tag `psp-1.3.1`; `psp-1.3.1-master` is its
-host port). They were reconstructed from the original binaries, which have
-symbols, and from the debugging information in the released `libgcc.a`,
-`libstdc++.a` and `libsupc++.a`:
+Sony distributed its GCC sources and patches to licensed developers only,
+through the PlayStation developer network (DevNet); they were never
+publicly released. This tree does not use them. `gcc-3.3.3/` starts from
+pristine FSF GCC 3.3.3 (tag `fsf-gcc-3.3.3`), and every PSP change on top
+was reconstructed from the public release binaries. The 1.7.1 changes sit
+on top of the reconstructed psp-gcc 1.3.1 (tag `psp-1.3.1`;
+`psp-1.3.1-master` is its host port). The evidence is the original
+binaries, which have symbols, and the debugging information in the
+released `libgcc.a`, `libstdc++.a` and `libsupc++.a`:
 
 - strings, symbols, `insn_data` and the `abort()` line numbers in `cc1`
 - emulation of the original `cc1` and decompiled functions
 - `DW_AT_decl_line` values and line tables of the libraries
 - the installed headers, specs and libraries
 
-The reconstruction was then checked by rebuilding with the original
-toolchain (see "Verification"). Binutils are not covered here.
+Because the patches were rebuilt from binaries, code that left no trace in
+them, such as comments and formatting, is not necessarily Sony's. The
+reconstruction was checked by rebuilding with the original toolchain (see
+"Verification"). Binutils are not covered here.
 
 ## Branches
 
@@ -60,7 +65,7 @@ changes, Japanese messages), see the commits up to `psp-1.3.1`.
 - **`-mcallee-saved-gp` and the `gp_safe` function attribute:** `$gp` saved and restored like a callee-saved register, reloaded from `_gp`.
 - **`gthr-psp.h`:** mutexes lock by suspending interrupts instead of using semaphores; `sceKernelCpuResumeIntr` returns `void` (also in libstdc++'s `atomicity.h`).
 - **libgcc** is built with `-g` again.
-- **Source layout only** (line numbers in `abort()` calls and debugging information): `cpplex.c`, `block_move_loop_allegrex`, `enum mips_builtins` moved to `mips.h`. Sony's `mips.h` has eleven lines whose content cannot be recovered; a comment of the same length stands in for them.
+- **Source layout only** (line numbers in `abort()` calls and debugging information): `cpplex.c`, `block_move_loop_allegrex`, `enum mips_builtins` moved to `mips.h`. Sony's `mips.h` has eleven lines whose content left no trace in the binaries; a comment of the same length stands in for them.
 
 **Host port (`master`):**
 
