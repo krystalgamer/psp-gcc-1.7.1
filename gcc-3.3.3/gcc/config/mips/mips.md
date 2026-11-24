@@ -6730,6 +6730,16 @@ move\\t%0,%z4\\n\\
   [(set_attr "type"	"move")
    (set_attr "mode"	"DI")
    (set_attr "length"	"12")])
+
+;; Load $gp with the address of _gp, for functions that do not trust
+;; the incoming value.
+(define_insn "loadgpsym"
+  [(set (reg:SI 28)
+	(unspec_volatile:SI [(match_operand:SI 0 "" "")] 0))]
+  ""
+  "la\\t$28,_gp"
+  [(set_attr "type"	"move")
+   (set_attr "mode"	"SI")])
 
 ;; Block moves, see mips.c for more details.
 ;; Argument 0 is the destination
