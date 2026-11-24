@@ -1320,6 +1320,8 @@ real_to_integer (r)
 	  i = i << (HOST_BITS_PER_LONG - 1) << 1;
 	  i |= r->sig[SIGSZ-2];
 	}
+      else if (HOST_BITS_PER_LONG == 2*HOST_BITS_PER_WIDE_INT)
+	i = r->sig[SIGSZ-1] >> (HOST_BITS_PER_LONG / 2);
       else
 	abort ();
 
@@ -1387,6 +1389,11 @@ real_to_integer2 (plow, phigh, r)
 	  low = t.sig[SIGSZ-3];
 	  low = low << (HOST_BITS_PER_LONG - 1) << 1;
 	  low |= t.sig[SIGSZ-4];
+	}
+      else if (HOST_BITS_PER_LONG == 2*HOST_BITS_PER_WIDE_INT)
+	{
+	  high = t.sig[SIGSZ-1] >> (HOST_BITS_PER_LONG / 2);
+	  low = t.sig[SIGSZ-1];
 	}
       else
 	abort ();
@@ -2035,6 +2042,13 @@ real_from_integer (r, mode, low, high, unsigned_p)
 	  r->sig[SIGSZ-4] = low;
 	  if (SIGSZ > 4)
 	    memset (r->sig, 0, sizeof(long)*(SIGSZ-4));
+	}
+      else if (HOST_BITS_PER_LONG == 2*HOST_BITS_PER_WIDE_INT)
+	{
+	  r->sig[SIGSZ-1] = ((unsigned long) (unsigned HOST_WIDE_INT) high
+			     << (HOST_BITS_PER_LONG / 2))
+			    | (unsigned HOST_WIDE_INT) low;
+	  memset (r->sig, 0, sizeof(long)*(SIGSZ-1));
 	}
       else
 	abort ();

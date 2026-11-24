@@ -57,7 +57,9 @@ struct real_value GTY(())
    consecutive "w" slots.  Moreover, we've got to compute the number of "w"
    slots at preprocessor time, which means we can't use sizeof.  Guess.  */
 
-#define REAL_VALUE_TYPE_SIZE (SIGNIFICAND_BITS + 32)
+/* The header bitfields take 32 bits, but with 64-bit longs the significand
+   is aligned to 64 bits.  */
+#define REAL_VALUE_TYPE_SIZE (SIGNIFICAND_BITS + HOST_BITS_PER_LONG)
 #define REAL_WIDTH \
   (REAL_VALUE_TYPE_SIZE/HOST_BITS_PER_WIDE_INT \
    + (REAL_VALUE_TYPE_SIZE%HOST_BITS_PER_WIDE_INT ? 1 : 0)) /* round up */
@@ -91,7 +93,15 @@ extern char test_real_width
 #     if REAL_WIDTH == 6
 #      define CONST_DOUBLE_FORMAT "wwwwww"
 #     else
-       #error "REAL_WIDTH > 6 not supported"
+#      if REAL_WIDTH == 7
+#       define CONST_DOUBLE_FORMAT "wwwwwww"
+#      else
+#       if REAL_WIDTH == 8
+#        define CONST_DOUBLE_FORMAT "wwwwwwww"
+#       else
+	 #error "REAL_WIDTH > 8 not supported"
+#       endif
+#      endif
 #     endif
 #    endif
 #   endif
