@@ -1,11 +1,11 @@
 #!/bin/sh
-# Build the reconstructed psp-gcc 1.3.1 (GCC 3.3.3+allegrex-2.2.1-psp-1.3.1)
+# Build the reconstructed psp-gcc 1.7.1 (GCC 3.3.3+allegrex-2.2.2-psp-1.7.1)
 # on a modern 64-bit Linux host.
 #
 # Usage: ./build-psp-gcc.sh [build|install]
 #
 # Environment:
-#   PREFIX  installation prefix (default /usr/local/psp/gcc-1.3.1)
+#   PREFIX  installation prefix (default /usr/local/psp/gcc-1.7.1)
 #   BUILD   build directory     (default ./build, next to gcc-3.3.3 so that
 #           paths embedded in the libraries match the original build)
 #   JOBS    parallel make jobs  (default 4)
@@ -16,11 +16,17 @@
 #   - the target C library headers and libraries (newlib from the PSP
 #     toolchain) in $PREFIX/psp/include and $PREFIX/psp/lib; libstdc++
 #     cannot be configured without them.
+#   - a psp linker that can link ("psp-ld -shared").  Sony's psp-ld reads
+#     its scripts from the PSP SDK, /usr/local/psp/devkit/lib/ldscripts.
+#     The original was configured on a host with the SDK installed, so
+#     configure found that the linker mixes read-only and read-write
+#     sections (HAVE_LD_RO_RW_SECTION_MIXING), which decides the flags of
+#     the .eh_frame and .gcc_except_table sections.
 
 set -e
 
 TOP=$(cd "$(dirname "$0")" && pwd)
-PREFIX=${PREFIX:-/usr/local/psp/gcc-1.3.1}
+PREFIX=${PREFIX:-/usr/local/psp/gcc-1.7.1}
 BUILD=${BUILD:-$TOP/build}
 JOBS=${JOBS:-4}
 STEP=${1:-build}
@@ -39,6 +45,13 @@ for tool in psp-as psp-ld psp-ar psp-ranlib; do
   command -v $tool >/dev/null 2>&1 || {
     echo "error: $tool not found in PATH" >&2; exit 1; }
 done
+printf '.section myfoosect, "a"\n' > /tmp/psp-ld-check.$$.s
+if ! psp-as -o /tmp/psp-ld-check.$$.o /tmp/psp-ld-check.$$.s 2>/dev/null ||
+   ! psp-ld -shared -o /tmp/psp-ld-check.$$.so /tmp/psp-ld-check.$$.o 2>/dev/null; then
+  echo "warning: psp-ld -shared does not work (are the linker scripts installed?);" >&2
+  echo "         the exception-handling sections will not match the original" >&2
+fi
+rm -f /tmp/psp-ld-check.$$.*
 if [ ! -f "$PREFIX/psp/include/stdio.h" ]; then
   echo "error: target C library headers not found in $PREFIX/psp/include" >&2
   exit 1
