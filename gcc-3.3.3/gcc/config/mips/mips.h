@@ -242,6 +242,8 @@ extern void		sbss_section PARAMS ((void));
 					   multiply-add operations.  */
 #define MASK_BRANCHLIKELY  0x02000000   /* Generate Branch Likely
 					   instructions.  */
+#define MASK_CALLEE_SAVED_GP 0x04000000 /* Save and restore $gp like a
+					   callee-saved register.  */
 #define MASK_NO_ULSW	   0x10000000	/* Don't use unaligned load/store
 					   word instructions.  */
 #define MASK_EXT	   0x20000000	/* Use insert/extract instructions.  */
@@ -342,6 +344,7 @@ extern void		sbss_section PARAMS ((void));
 #define TARGET_NO_ULSW		(target_flags & MASK_NO_ULSW)
 #define TARGET_EXT		(target_flags & MASK_EXT)
 #define TARGET_MADD		(target_flags & MASK_MADD)
+#define TARGET_CALLEE_SAVED_GP	(target_flags & MASK_CALLEE_SAVED_GP)
 
 /* This is true if we must enable the assembly language file switching
    code.  */
@@ -665,6 +668,10 @@ extern void		sbss_section PARAMS ((void));
       N_("Use Branch Likely instructions, overriding default for arch")}, \
   { "no-branch-likely",  -MASK_BRANCHLIKELY,				\
       N_("Don't use Branch Likely instructions, overriding default for arch")}, \
+  { "callee-saved-gp",    MASK_CALLEE_SAVED_GP,				\
+      N_("Make gp register callee-saved")},				\
+  { "no-callee-saved-gp", -MASK_CALLEE_SAVED_GP,			\
+      N_("Don't make gp register callee-saved")},			\
   {"debug",		  MASK_DEBUG,					\
      NULL},								\
   {"debuga",		  MASK_DEBUG_A,					\

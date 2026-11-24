@@ -105,7 +105,9 @@ extern const char      *mips_emit_prefetch PARAMS ((rtx *));
 extern void		mips_init_builtins PARAMS ((void));
 extern rtx		mips_expand_builtin PARAMS ((tree, rtx, rtx,
 						     enum machine_mode, int));
+extern const struct attribute_spec mips_attribute_table[];
 #endif
+extern int		mips_cfun_gp_safe_p PARAMS ((void));
 extern const char      *mips_restore_gp PARAMS ((rtx *, rtx));
 extern const char      *output_block_move PARAMS ((rtx, rtx *, int,
 						   enum block_move_type));

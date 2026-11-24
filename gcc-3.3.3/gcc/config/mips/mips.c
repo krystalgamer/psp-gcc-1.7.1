@@ -158,6 +158,8 @@ static void mips_select_rtx_section PARAMS ((enum machine_mode, rtx,
 					     unsigned HOST_WIDE_INT));
 static int mips_use_dfa_pipeline_interface      PARAMS ((void));
 static void mips_encode_section_info		PARAMS ((tree, int));
+static tree mips_handle_gp_safe_attribute	PARAMS ((tree *, tree, tree,
+							 int, bool *));
 
 /* Structure to be filled in by compute_frame_size with register
    save masks, and offsets for the current function.  */
@@ -680,6 +682,9 @@ const struct mips_cpu_info mips_cpu_info_table[] = {
 #define TARGET_INIT_BUILTINS mips_init_builtins
 #undef TARGET_EXPAND_BUILTIN
 #define TARGET_EXPAND_BUILTIN mips_expand_builtin
+
+#undef TARGET_ATTRIBUTE_TABLE
+#define TARGET_ATTRIBUTE_TABLE mips_attribute_table
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 
@@ -6796,6 +6801,8 @@ compute_frame_size (size)
   extra_size = MIPS_STACK_ALIGN (((TARGET_ABICALLS) ? UNITS_PER_WORD : 0));
   var_size = MIPS_STACK_ALIGN (size);
   args_size = MIPS_STACK_ALIGN (current_function_outgoing_args_size);
+  if (TARGET_CALLEE_SAVED_GP || mips_cfun_gp_safe_p ())
+    mask = 1L << (PIC_OFFSET_TABLE_REGNUM - GP_REG_FIRST);
 
   /* The MIPS 3.0 linker does not like functions that dynamically
      allocate the stack and have 0 for STACK_DYNAMIC_OFFSET, since it
@@ -6811,6 +6818,12 @@ compute_frame_size (size)
   /* Calculate space needed for gp registers.  */
   for (regno = GP_REG_FIRST; regno <= GP_REG_LAST; regno++)
     {
+      if ((TARGET_CALLEE_SAVED_GP || mips_cfun_gp_safe_p ())
+	  && regno == PIC_OFFSET_TABLE_REGNUM)
+	{
+	  gp_reg_size += UNITS_PER_WORD;
+	  mask |= 1L << (regno - GP_REG_FIRST);
+	}
       /* $18 is a special case on the mips16.  It may be used to call
          a function which returns a floating point value, but it is
          marked in call_used_regs.  $31 is also a special case.  When
@@ -6881,6 +6894,7 @@ compute_frame_size (size)
      call to mcount.  */
   if (total_size == extra_size
       && (mips_abi == ABI_32 || mips_abi == ABI_O64 || mips_abi == ABI_EABI)
+      && ! TARGET_CALLEE_SAVED_GP && ! mips_cfun_gp_safe_p ()
       && ! current_function_profile)
     total_size = extra_size = 0;
   else if (TARGET_ABICALLS)
@@ -7218,6 +7232,9 @@ save_restore_insns (store_p, large_reg, large_offset)
 		mips_emit_frame_related_store (mem_rtx, reg_rtx, gp_offset);
 	      else
 		{
+		  if ((TARGET_CALLEE_SAVED_GP || mips_cfun_gp_safe_p ())
+		      && regno == PIC_OFFSET_TABLE_REGNUM)
+		    emit_insn (gen_blockage ());
 		  emit_move_insn (reg_rtx, mem_rtx);
 		  if (TARGET_MIPS16
 		      && regno != GP_REG_FIRST + 31
@@ -7234,6 +7251,9 @@ save_restore_insns (store_p, large_reg, large_offset)
     }
   else
     base_reg_rtx = 0, base_offset  = 0;
+  if ((TARGET_CALLEE_SAVED_GP || mips_cfun_gp_safe_p ())
+      && store_p && BITSET_P (mask, PIC_OFFSET_TABLE_REGNUM - GP_REG_FIRST))
+    emit_insn (gen_loadgpsym (gen_rtx (SYMBOL_REF, Pmode, "_gp")));
 
   /* Save floating point registers if needed.  */
   if (fmask)
@@ -11425,6 +11445,46 @@ mips_expand_builtin (exp, target, subtarget, mode, ignore)
 	}
 
   return 0;
+}
+
+/* Table of machine attributes.  gp_safe functions save $gp, load it
+   with the address of _gp on entry and restore it on exit.  */
+
+const struct attribute_spec mips_attribute_table[] =
+{
+  /* { name, min_len, max_len, decl_req, type_req, fn_type_req, handler } */
+  { "gp_safe",   0, 0, true,  false, false, mips_handle_gp_safe_attribute },
+  { NULL,        0, 0, false, false, false, NULL }
+};
+
+/* Handle a "gp_safe" attribute; arguments as in
+   struct attribute_spec.handler.  */
+
+static tree
+mips_handle_gp_safe_attribute (node, name, args, flags, no_add_attrs)
+     tree *node;
+     tree name;
+     tree args ATTRIBUTE_UNUSED;
+     int flags ATTRIBUTE_UNUSED;
+     bool *no_add_attrs;
+{
+  if (TREE_CODE (*node) != FUNCTION_DECL)
+    {
+      warning ("`%s' attribute only applies to functions",
+	       IDENTIFIER_POINTER (name));
+      *no_add_attrs = true;
+    }
+
+  return NULL_TREE;
+}
+
+/* Return true if the current function has the gp_safe attribute.  */
+
+int
+mips_cfun_gp_safe_p ()
+{
+  return lookup_attribute ("gp_safe",
+			   DECL_ATTRIBUTES (current_function_decl)) != NULL_TREE;
 }
 
 
