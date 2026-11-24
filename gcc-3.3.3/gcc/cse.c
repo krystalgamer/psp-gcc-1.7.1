@@ -2704,7 +2704,7 @@ exp_equiv_p (x, y, validate, equal_values)
 	  break;
 
 	case 'w':
-	  if (XWINT (x, i) != XWINT (y, i))
+	  if (XWINT_SLOT_DIFFERS (x, y, i))
 	    return 0;
 	  break;
 

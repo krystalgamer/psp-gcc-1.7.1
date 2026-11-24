@@ -268,6 +268,11 @@ rtx_alloc (code)
      portable anyway; this is.  */
 
   memset (rt, 0, sizeof (struct rtx_def) - sizeof (rtunion));
+  /* Also clear the operands when a HOST_WIDE_INT does not fill an
+     rtunion, so that the rest of a 'w' slot is zero; see
+     XWINT_SLOT_DIFFERS.  */
+  if (sizeof (HOST_WIDE_INT) < sizeof (rtunion))
+    memset (&rt->fld[0], 0, n * sizeof (rtunion));
   PUT_CODE (rt, code);
   return rt;
 }
@@ -469,7 +474,7 @@ rtx_equal_p (x, y)
       switch (fmt[i])
 	{
 	case 'w':
-	  if (XWINT (x, i) != XWINT (y, i))
+	  if (XWINT_SLOT_DIFFERS (x, y, i))
 	    return 0;
 	  break;
 

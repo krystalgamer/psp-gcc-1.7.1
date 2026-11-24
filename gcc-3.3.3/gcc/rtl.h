@@ -471,6 +471,11 @@ do {				\
 } while (0)
 
 #define XWINT(RTX, N)	(RTL_CHECK1 (RTX, N, 'w').rtwint)
+/* Nonzero if the 'w' operands N of X and Y differ.  A 'w' slot is an
+   rtunion, which can be wider than a HOST_WIDE_INT, and a CONST_DOUBLE
+   keeps its REAL_VALUE_TYPE across whole slots; compare all of it.  */
+#define XWINT_SLOT_DIFFERS(X, Y, N) \
+  (memcmp (&(X)->fld[N], &(Y)->fld[N], sizeof (rtunion)) != 0)
 #define XINT(RTX, N)	(RTL_CHECK2 (RTX, N, 'i', 'n').rtint)
 #define XSTR(RTX, N)	(RTL_CHECK2 (RTX, N, 's', 'S').rtstr)
 #define XEXP(RTX, N)	(RTL_CHECK2 (RTX, N, 'e', 'u').rtx)

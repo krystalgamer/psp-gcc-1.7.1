@@ -1917,7 +1917,7 @@ expr_equiv_p (x, y)
 	  break;
 
 	case 'w':
-	  if (XWINT (x, i) != XWINT (y, i))
+	  if (XWINT_SLOT_DIFFERS (x, y, i))
 	    return 0;
 	break;
 

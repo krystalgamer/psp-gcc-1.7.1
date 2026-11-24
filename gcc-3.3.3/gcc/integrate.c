@@ -2371,8 +2371,9 @@ copy_rtx_and_substitute (orig, map, for_lhs)
       switch (*format_ptr++)
 	{
 	case '0':
-	  /* Copy this through the wide int field; that's safest.  */
-	  X0WINT (copy, i) = X0WINT (orig, i);
+	  /* Copy the whole field: it may hold a pointer, which can be
+	     wider than a HOST_WIDE_INT.  */
+	  copy->fld[i] = orig->fld[i];
 	  break;
 
 	case 'e':
@@ -2399,7 +2400,8 @@ copy_rtx_and_substitute (orig, map, for_lhs)
 	  break;
 
 	case 'w':
-	  XWINT (copy, i) = XWINT (orig, i);
+	  /* Copy the whole slot; see XWINT_SLOT_DIFFERS.  */
+	  copy->fld[i] = orig->fld[i];
 	  break;
 
 	case 'i':

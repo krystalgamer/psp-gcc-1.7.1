@@ -472,7 +472,7 @@ rtx_equal_for_cselib_p (x, y)
       switch (fmt[i])
 	{
 	case 'w':
-	  if (XWINT (x, i) != XWINT (y, i))
+	  if (XWINT_SLOT_DIFFERS (x, y, i))
 	    return 0;
 	  break;
 

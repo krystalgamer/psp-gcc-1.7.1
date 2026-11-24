@@ -1701,7 +1701,7 @@ rtx_equal_for_loop_p (x, y, movables, regs)
       switch (fmt[i])
 	{
 	case 'w':
-	  if (XWINT (x, i) != XWINT (y, i))
+	  if (XWINT_SLOT_DIFFERS (x, y, i))
 	    return 0;
 	  break;
 
@@ -3677,7 +3677,7 @@ rtx_equal_for_prefetch_p (x, y)
       switch (fmt[i])
 	{
 	case 'w':
-	  if (XWINT (x, i) != XWINT (y, i))
+	  if (XWINT_SLOT_DIFFERS (x, y, i))
 	    return 0;
 	  break;
 
