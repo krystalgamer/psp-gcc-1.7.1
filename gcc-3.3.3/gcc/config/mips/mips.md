@@ -3368,7 +3368,20 @@
 ;; Do not use the integer abs macro instruction, since that signals an
 ;; exception on -2147483648 (sigh).
 
-(define_insn "abssi2"
+(define_expand "abssi2"
+  [(set (match_operand:SI 0 "register_operand" "=d")
+	(abs:SI (match_operand:SI 1 "register_operand" "d")))]
+  "!TARGET_MIPS16"
+  "
+{
+  if (TARGET_ALLEGREX31)
+    emit_insn (gen_abssi2_allegrex (operands[0], operands[1]));
+  else
+    emit_insn (gen_abssi2_internal (operands[0], operands[1]));
+  DONE;
+}")
+
+(define_insn "abssi2_internal"
   [(set (match_operand:SI 0 "register_operand" "=d")
 	(abs:SI (match_operand:SI 1 "register_operand" "d")))]
   "!TARGET_MIPS16"
@@ -11367,6 +11380,25 @@ ld\\t%2,%1-%S1(%2)\;daddu\\t%2,%2,$31\\n\\t%*j\\t%2"
     FAIL;
 
   emit_insn (gen_smaxsi3_allegrex (operands[0], operands[1], operands[2]));
+  DONE;
+}")
+
+;; Absolute value as the maximum of the value and its negation.  This
+;; avoids the branch of abssi2_internal, and the integer abs macro
+;; instruction, which signals an exception on -2147483648 (see
+;; above).  The result for -2147483648 is -2147483648, as with
+;; abssi2_internal.
+
+(define_expand "abssi2_allegrex"
+  [(set (match_operand:SI 0 "register_operand" "=d")
+	(abs:SI (match_operand:SI 1 "register_operand" "d")))]
+  "TARGET_ALLEGREX31"
+  "
+{
+  rtx neg = gen_reg_rtx (SImode);
+
+  emit_insn (gen_negsi2 (neg, operands[1]));
+  emit_insn (gen_smaxsi3_allegrex (operands[0], operands[1], neg));
   DONE;
 }")
 
