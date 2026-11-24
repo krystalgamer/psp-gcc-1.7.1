@@ -32,8 +32,7 @@ Boston, MA 02111-1307, USA.  */
 %{mtune=*:%e-mtune not supported} \
 %{mips3:%e-mips3 not supported} \
 %{mips4:%e-mips4 not supported} \
--march=allegrex -mtune=allegrex \
-%{!mulsw:-mno-ulsw}"
+-march=allegrex -mtune=allegrex"
 
 #undef SUBTARGET_CPP_SPEC
 #define SUBTARGET_CPP_SPEC "\
