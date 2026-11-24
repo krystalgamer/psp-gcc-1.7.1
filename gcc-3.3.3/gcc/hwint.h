@@ -56,7 +56,11 @@
 
 #ifndef HOST_BITS_PER_WIDE_INT
 
-# if HOST_BITS_PER_LONG > HOST_BITS_PER_INT
+/* Do not widen HOST_WIDE_INT to a 64-bit long when the target needs no
+   more than an int (MAX_LONG_TYPE_SIZE): the compiler then behaves the
+   same on LP64 hosts as on 32-bit ones.  */
+# if HOST_BITS_PER_LONG > HOST_BITS_PER_INT \
+     && ! (defined (MAX_LONG_TYPE_SIZE) && MAX_LONG_TYPE_SIZE <= HOST_BITS_PER_INT)
 #  define HOST_BITS_PER_WIDE_INT HOST_BITS_PER_LONG
 #  define HOST_WIDE_INT long
 # else
