@@ -1572,7 +1572,9 @@ do {							\
    target machine.  If you don't define this, the default is one
    word.  */
 #define LONG_TYPE_SIZE (TARGET_LONG64 ? 64 : 32)
+#ifndef MAX_LONG_TYPE_SIZE
 #define MAX_LONG_TYPE_SIZE 64
+#endif
 
 /* A C expression for the size in bits of the type `long long' on the
    target machine.  If you don't define this, the default is two
