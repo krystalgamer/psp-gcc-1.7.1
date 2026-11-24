@@ -2016,7 +2016,7 @@ c_common_type_for_mode (mode, unsignedp)
   if (mode == DImode)
     return unsignedp ? unsigned_intDI_type_node : intDI_type_node;
 
-#if HOST_BITS_PER_WIDE_INT >= 64
+#if 1 /* TImode types even with a 32-bit HOST_WIDE_INT */
   if (mode == TYPE_MODE (intTI_type_node))
     return unsignedp ? unsigned_intTI_type_node : intTI_type_node;
 #endif
@@ -2089,7 +2089,7 @@ c_common_unsigned_type (type)
     return long_long_unsigned_type_node;
   if (type1 == widest_integer_literal_type_node)
     return widest_unsigned_literal_type_node;
-#if HOST_BITS_PER_WIDE_INT >= 64
+#if 1 /* TImode types even with a 32-bit HOST_WIDE_INT */
   if (type1 == intTI_type_node)
     return unsigned_intTI_type_node;
 #endif
@@ -2124,7 +2124,7 @@ c_common_signed_type (type)
     return long_long_integer_type_node;
   if (type1 == widest_unsigned_literal_type_node)
     return widest_integer_literal_type_node;
-#if HOST_BITS_PER_WIDE_INT >= 64
+#if 1 /* TImode types even with a 32-bit HOST_WIDE_INT */
   if (type1 == unsigned_intTI_type_node)
     return intTI_type_node;
 #endif
@@ -2167,7 +2167,7 @@ c_common_signed_or_unsigned_type (unsignedp, type)
     return (unsignedp ? widest_unsigned_literal_type_node
 	    : widest_integer_literal_type_node);
 
-#if HOST_BITS_PER_WIDE_INT >= 64
+#if 1 /* TImode types even with a 32-bit HOST_WIDE_INT */
   if (TYPE_PRECISION (type) == TYPE_PRECISION (intTI_type_node))
     return unsignedp ? unsigned_intTI_type_node : intTI_type_node;
 #endif
@@ -3258,7 +3258,7 @@ c_common_nodes_and_builtins ()
 					    intSI_type_node));
   (*lang_hooks.decls.pushdecl) (build_decl (TYPE_DECL, NULL_TREE,
 					    intDI_type_node));
-#if HOST_BITS_PER_WIDE_INT >= 64
+#if 1 /* TImode types even with a 32-bit HOST_WIDE_INT */
   (*lang_hooks.decls.pushdecl) (build_decl (TYPE_DECL,
 					    get_identifier ("__int128_t"),
 					    intTI_type_node));
@@ -3271,7 +3271,7 @@ c_common_nodes_and_builtins ()
 					    unsigned_intSI_type_node));
   (*lang_hooks.decls.pushdecl) (build_decl (TYPE_DECL, NULL_TREE,
 					    unsigned_intDI_type_node));
-#if HOST_BITS_PER_WIDE_INT >= 64
+#if 1 /* TImode types even with a 32-bit HOST_WIDE_INT */
   (*lang_hooks.decls.pushdecl) (build_decl (TYPE_DECL,
 					    get_identifier ("__uint128_t"),
 					    unsigned_intTI_type_node));
