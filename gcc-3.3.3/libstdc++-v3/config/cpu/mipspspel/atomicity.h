@@ -31,8 +31,14 @@
 #define _BITS_ATOMICITY_H 1
 
 extern "C" {
+#if defined(_IN_GCC_LIB)
+/* Minimal kernel stuff to bootstrap compiler */
+
 extern int sceKernelCpuSuspendIntr (void);
-extern int sceKernelCpuResumeIntr (int oldstat);
+extern void sceKernelCpuResumeIntr (int oldstat);
+#else
+#include <kernel.h>
+#endif
 }
 
 typedef int _Atomic_word;

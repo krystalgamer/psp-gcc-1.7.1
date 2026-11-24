@@ -37,7 +37,7 @@ extern "C" {
 /* Minimal kernel stuff to bootstrap compiler */
 
 extern int sceKernelCpuSuspendIntr (void);
-extern int sceKernelCpuResumeIntr (int oldstat);
+extern void sceKernelCpuResumeIntr (int oldstat);
 #else
 #include <kernel.h>
 #endif
