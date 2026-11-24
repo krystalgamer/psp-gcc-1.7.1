@@ -11160,7 +11160,7 @@ ld\\t%2,%1-%S1(%2)\;daddu\\t%2,%2,$31\\n\\t%*j\\t%2"
 (define_insn "insv_allegrex"
   [(set (match_operand:SI 0 "register_operand" "+d,d,d")
 	(unspec:SI [(match_operand:SI 1 "register_operand" "0,d,d")
-		    (match_operand:SI 2 "register_operand" "d,d,0")
+		    (match_operand:SI 2 "arith_operand" "d,dJ,0")
 		    (match_operand:SI 3 "const_int_operand" "")
 		    (match_operand:SI 4 "const_int_operand" "")]
 		   UNSPEC_INS))
@@ -11179,7 +11179,14 @@ ld\\t%2,%1-%S1(%2)\;daddu\\t%2,%2,$31\\n\\t%*j\\t%2"
   if ((unsigned HOST_WIDE_INT) (INTVAL (operands[3]) + INTVAL (operands[4]) - 1)
       > 31)
     abort ();
-  if (REGNO (operands[0]) == REGNO (operands[1]))
+  if (GET_CODE (operands[2]) == CONST_INT)
+    {
+      /* Operand 2 can only be zero (constraint J).  */
+      if (INTVAL (operands[2]) != 0)
+	abort ();
+      output_asm_insn (\"ins\\t%0,$0,%3,%4\", operands);
+    }
+  else if (REGNO (operands[0]) == REGNO (operands[1]))
     output_asm_insn (\"ins\\t%0,%2,%3,%4\", operands);
   else if (REGNO (operands[0]) != REGNO (operands[2]))
     {
@@ -11206,10 +11213,9 @@ ld\\t%2,%1-%S1(%2)\;daddu\\t%2,%2,$31\\n\\t%*j\\t%2"
   "TARGET_ALLEGREX31 && TARGET_EXT"
   "*
 {
-  /* As insv_allegrex, for a field of a register (the canonical
-     zero_extract form): operand 1 is the size, operand 2 the
-     position and operand 3 the value.  The register is updated
-     in place, so no copies are needed.  */
+  /* As insv_allegrex, for the canonical zero_extract form: operand 1
+     is the size, operand 2 the position and operand 3 the value.  The
+     register is updated in place, so no copies are needed.  */
   if (GET_CODE (operands[1]) != CONST_INT || GET_CODE (operands[2]) != CONST_INT)
     abort ();
   if ((unsigned HOST_WIDE_INT) (INTVAL (operands[1]) - 1) > 31)
